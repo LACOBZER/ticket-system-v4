@@ -1,14 +1,22 @@
-<form onsubmit="login(event)">
-<input id="u">
-<input id="p" type="password">
-<button>Login</button>
-</form>
+<!-- IT Support Ticket System -->
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Support Login</h2>
+
+<input id="user">
+<input id="pass">
+<button onclick="login()">Login</button>
 
 <script>
-function login(e){
-e.preventDefault();
-if(u.value==="support" && p.value==="support123"){
-location="admin.html";
+function login(){
+if(user.value==="support" && pass.value==="support123"){
+localStorage.setItem("role","support");
+window.location="admin.html";
 }
 }
 </script>
+
+</body>
+</html>

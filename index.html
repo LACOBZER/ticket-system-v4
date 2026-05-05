@@ -1,34 +1,25 @@
 <!--
 IT Support Ticket System
-Luciana Bezerra - 2026
 -->
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-<meta charset="UTF-8">
 <title>Ticket erstellen</title>
 </head>
+
 <body>
 
 <h2>Ticket erstellen</h2>
 
 <form id="form">
-<input id="user" placeholder="Benutzer"><br>
-<input id="customer" placeholder="Kunde"><br>
-<input id="subject" placeholder="Anliegen"><br>
-<textarea id="desc"></textarea><br>
-
-<select id="priority">
-<option value="low">Low</option>
-<option value="medium">Medium</option>
-<option value="high">High</option>
-</select>
-
-<button>Speichern</button>
+<input id="participant" placeholder="Benutzer">
+<input id="subject" placeholder="Anliegen">
+<textarea id="desc"></textarea>
+<button>Erstellen</button>
 </form>
 
 <script>
-document.getElementById("form").onsubmit = async e=>{
+form.addEventListener("submit", async (e)=>{
 e.preventDefault();
 
 await fetch("/api/tickets",{
@@ -36,16 +27,16 @@ method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 number:"T-"+Date.now(),
-participant:user.value,
-customer:customer.value,
+participant:participant.value,
 subject:subject.value,
 description:desc.value,
-priority:priority.value
+status:"open",
+notes:"[]"
 })
 });
 
-alert("Ticket gespeichert");
-}
+alert("Ticket erstellt");
+});
 </script>
 
 </body>

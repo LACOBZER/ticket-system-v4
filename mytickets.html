@@ -1,3 +1,8 @@
+<!-- IT Support Ticket System -->
+<!DOCTYPE html>
+<html>
+<body>
+
 <h2>Meine Tickets</h2>
 
 <input id="name">
@@ -10,11 +15,16 @@ async function load(){
 const res = await fetch("/api/tickets");
 const data = await res.json();
 
-list.innerHTML="";
+const filtered = data.filter(t => t.participant === name.value);
 
-data.filter(t=>t.participant===name.value)
-.forEach(t=>{
-list.innerHTML+=`<div>${t.number} - ${t.subject}</div>`;
+let html="";
+filtered.forEach(t=>{
+html+=`<div>${t.number} - ${t.subject}</div>`;
 });
+
+list.innerHTML = html;
 }
 </script>
+
+</body>
+</html>

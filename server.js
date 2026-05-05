@@ -1,85 +1,83 @@
 /*
-IT Support Ticket System
-Autor: Luciana Bezerra
-2026
+ IT Support Ticket System
+ Entwickelt von: Luciana Bezerra
+ Jahr: 2026
+ Backend mit Node.js + SQL Server
 */
 
 import express from "express";
 import cors from "cors";
-import { createClient } from "@supabase/supabase-js";
+import sql from "mssql";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static("."));
-
 const PORT = process.env.PORT || 3000;
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.get("/api/health", (req, res) => {
-  res.json({ success: true, message: "Server läuft" });
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+
+const dbConfig = {
+  server: "VSRV-SQL\\SQLEXPRESS",
+  database: "TicketDB",
+  user: "sa",
+  password: "DEIN_PASSWORT",
+  options: {
+    encrypt: false,
+    trustServerCertificate: true
+  }
+};
+
+async function getConnection() {
+  return await sql.connect(dbConfig);
+}
+
+app.get("/api/tickets", async (req, res) => {
+  const pool = await getConnection();
+  const result = await pool.request().query("SELECT * FROM Tickets ORDER BY id DESC");
+  res.json(result.recordset);
 });
 
 app.post("/api/tickets", async (req, res) => {
-  try {
-    const ticket = {
-      number: "T-" + Date.now(),
-      participant: req.body.participant || "",
-      subject: req.body.subject || "",
-      description: req.body.description || "",
-      status: "open",
-      created: new Date().toISOString()
-    };
+  const t = req.body;
+  const pool = await getConnection();
 
-    const { data, error } = await supabase
-      .from("tickets")
-      .insert([ticket])
-      .select();
+  await pool.request()
+    .input("number", sql.NVarChar(50), t.number)
+    .input("participant", sql.NVarChar(100), t.participant)
+    .input("customer", sql.NVarChar(100), t.customer)
+    .input("subject", sql.NVarChar(200), t.subject)
+    .input("description", sql.NVarChar(sql.MAX), t.description)
+    .input("priority", sql.NVarChar(50), t.priority)
+    .input("status", sql.NVarChar(50), "open")
+    .input("notes", sql.NVarChar(sql.MAX), "[]")
+    .query(`
+      INSERT INTO Tickets
+      (number,participant,customer,subject,description,priority,status,notes,created)
+      VALUES
+      (@number,@participant,@customer,@subject,@description,@priority,@status,@notes,GETDATE())
+    `);
 
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        error: error.message
-      });
-    }
-
-    return res.json(data[0]);
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({ success: true });
 });
 
-app.get("/api/tickets", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("tickets")
-      .select("*")
-      .order("created", { ascending: false });
+app.put("/api/tickets/:id", async (req, res) => {
+  const pool = await getConnection();
 
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        error: error.message
-      });
-    }
+  await pool.request()
+    .input("id", sql.Int, req.params.id)
+    .input("status", sql.NVarChar(50), req.body.status)
+    .input("notes", sql.NVarChar(sql.MAX), req.body.notes)
+    .query("UPDATE Tickets SET status=@status, notes=@notes WHERE id=@id");
 
-    return res.json(data);
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
-  console.log("Server läuft auf Port " + PORT);
+  console.log("Server läuft auf http://localhost:" + PORT);
 });

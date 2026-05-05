@@ -1,14 +1,52 @@
-<form onsubmit="login(event)">
-<input id="u">
-<input id="p" type="password">
+<!--
+IT Support Ticket System
+Entwickelt von: Luciana Bezerra
+Jahr: 2026
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Login</title>
+  <style>
+    body{font-family:Arial;background:#f4f6f9;margin:0;padding:0;}
+    header{background:#007bff;color:white;padding:20px;text-align:center;font-size:22px;}
+    .container{display:flex;justify-content:center;margin-top:60px;}
+    .card{background:white;padding:30px;width:400px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    input{width:100%;padding:10px;margin-bottom:15px;border-radius:6px;border:1px solid #ccc;}
+    button{background:#007bff;color:white;border:none;padding:12px;width:100%;border-radius:6px;}
+    .error{color:red;display:none;}
+  </style>
+</head>
+<body>
+
+<header>IT Support Ticket System</header>
+
+<div class="container">
+<div class="card">
+<h2>Admin Login</h2>
+
+<div id="error" class="error">Falscher Login</div>
+
+<form id="loginForm">
+<input id="user" placeholder="Username">
+<input type="password" id="pass" placeholder="Password">
 <button>Login</button>
 </form>
 
+</div>
+</div>
+
 <script>
-function login(e){
-e.preventDefault();
-if(u.value==="admin" && p.value==="admin123"){
-location="admin.html";
-}
-}
+document.getElementById("loginForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  if(user.value==="admin" && pass.value==="admin123"){
+    localStorage.setItem("role","admin");
+    window.location="admin.html";
+  } else {
+    error.style.display="block";
+  }
+});
 </script>
+
+</body>
+</html>

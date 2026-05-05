@@ -1,35 +1,42 @@
-<h2>Tickets</h2>
-<div id="list"></div>
+<!--
+IT Support Ticket System
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Support Dashboard</title>
+</head>
+
+<body>
+
+<h1>Support Dashboard</h1>
+<button onclick="loadTickets()">Aktualisieren</button>
+
+<div id="tickets"></div>
 
 <script>
-async function load(){
-const res = await fetch("/api/tickets");
-const data = await res.json();
+async function loadTickets(){
+  const res = await fetch("/api/tickets");
+  const data = await res.json();
 
-let html="";
-data.forEach(t=>{
-html+=`
-<div>
-<b>${t.number}</b> - ${t.subject}<br>
-<select onchange="update(${t.id},this.value)">
-<option ${t.status==="open"?"selected":""}>open</option>
-<option ${t.status==="in_progress"?"selected":""}>in_progress</option>
-<option ${t.status==="closed"?"selected":""}>closed</option>
-</select>
-</div><hr>`;
-});
+  let html = "";
 
-list.innerHTML=html;
+  data.forEach(t => {
+    html += `
+      <div>
+        <b>${t.number}</b> - ${t.subject}<br>
+        ${t.description}<br>
+        Status: ${t.status}
+        <hr>
+      </div>
+    `;
+  });
+
+  document.getElementById("tickets").innerHTML = html;
 }
 
-async function update(id,status){
-await fetch("/api/tickets/"+id,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({status,notes:"[]"})
-});
-load();
-}
-
-load();
+loadTickets();
 </script>
+
+</body>
+</html>
